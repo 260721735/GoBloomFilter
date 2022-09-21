@@ -2,26 +2,25 @@ package BloomFilter
 
 import (
 	"encoding/binary"
-	"errors"
-	"strconv"
 )
 
 const (
 	defaultfalsePositiveProbability = 0.03
 	defaultDataLen                  = 2000000
-	maxElement                      = 20000000
+	//maxElement                      = 20000000
 	//maxNumOfBits                    = 1000000000
 )
 
 type BloomFilter struct {
 	bitCount uint64
-	data     [][defaultDataLen]uint64
+	data     []uint64
 	//data               []uint64
 	numOfBits          uint64
 	numOfHashFunctions uint64
 }
 
 //ln(falsePositiveProbability)=len/expectedInsertions
+//use falsePositiveProbability to Custom precision
 func CreateWithFPP(expectedInsertions uint64, falsePositiveProbability float64) (BloomFilter, error) {
 	return create(expectedInsertions, falsePositiveProbability)
 }
@@ -29,9 +28,9 @@ func Create(expectedInsertions uint64) (BloomFilter, error) {
 	return create(expectedInsertions, defaultfalsePositiveProbability)
 }
 func create(expectedInsertions uint64, falsePositiveProbability float64) (BloomFilter, error) {
-	if expectedInsertions > maxElement {
-		return BloomFilter{}, errors.New("maxElement is " + strconv.Itoa(maxElement))
-	}
+	//if expectedInsertions > maxElement {
+	//	return BloomFilter{}, errors.New("maxElement is " + strconv.Itoa(maxElement))
+	//}
 	var err error
 	b := BloomFilter{}
 	b.numOfBits, err = optimalNumOfBits(expectedInsertions, falsePositiveProbability)
@@ -39,13 +38,8 @@ func create(expectedInsertions uint64, falsePositiveProbability float64) (BloomF
 		return b, err
 	}
 	b.numOfHashFunctions = optimalNumOfHashFunctions(expectedInsertions, b.numOfBits)
-	for {
-		b.data = append(b.data, [defaultDataLen]uint64{0})
-		if uint64(len(b.data)*defaultDataLen) >= b.numOfBits {
-			break
-		}
-		//log.Println("NumOfBits", b.NumOfBits, "now len", len(b.data)*defaultDataLen)
-	}
+	b.data = make([]uint64, b.numOfBits)
+
 	//for i := uint64(0); i < b.NumOfBits; i++ {
 	//	b.data = append(b.data, 0)
 	//}

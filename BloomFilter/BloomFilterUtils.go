@@ -39,8 +39,8 @@ func (b *BloomFilter) put(element []byte) {
 	}
 }
 func (b *BloomFilter) set(index uint64) {
-	//b.data[index>>6] |= uint64(1) << (index % 64)
-	b.data[int(index>>6)/defaultDataLen%len(b.data)][int(index>>6)%defaultDataLen] |= uint64(1) << (index % 64)
+	b.data[index>>6] |= uint64(1) << (index % 64)
+	//b.data[int(index>>6)/defaultDataLen%len(b.data)][int(index>>6)%defaultDataLen] |= uint64(1) << (index % 64)
 }
 
 func (b BloomFilter) mightContain(element []byte) bool {
@@ -52,6 +52,7 @@ func (b BloomFilter) mightContain(element []byte) bool {
 		if nextHash < 0 {
 			nextHash = ^nextHash
 		}
+
 		if !b.get(uint64(nextHash) % b.numOfBits) {
 			return false
 		}
@@ -63,10 +64,14 @@ func (b BloomFilter) mightContain(element []byte) bool {
 }
 
 func (b BloomFilter) get(index uint64) bool {
-	return getBit(b.data[int(index>>6)/defaultDataLen%len(b.data)][int(index>>6)%defaultDataLen], index%64) == 1
+	return getBit(b.data[index>>6], index%64) == 1
 }
 
+//func (b BloomFilter) get(index uint64) bool {
+//	return getBit(b.data[int(index>>6)/defaultDataLen%len(b.data)][int(index>>6)%defaultDataLen], index%64) == 1
+//}
 func getBit(c uint64, i uint64) uint64 {
+	//b.data[index>>6] |= uint64(1) << (index % 64)
 	return c >> i & 0x1
 	// return (this.data[index >> 6] & 1L << index) != 0L;
 	//return c & (0x1 << i)
